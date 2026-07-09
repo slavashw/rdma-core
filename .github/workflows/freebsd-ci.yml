@@ -27,7 +27,7 @@ jobs:
           # The 'prepare' section runs inside the VM before copying files, 
           # ideal for installing system package dependencies.
           prepare: |
-          uname -a
+            uname -a
 
           # The 'run' section runs within your repository's root directory inside the VM.
           run: |

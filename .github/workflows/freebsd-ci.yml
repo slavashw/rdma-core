@@ -1,0 +1,40 @@
+name: FreeBSD Build
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  build-freebsd:
+    # vmactions runs a QEMU VM inside an Ubuntu runner, so runs-on MUST be ubuntu-latest
+    runs-on: ubuntu-latest
+    name: Build rdma-core on FreeBSD
+
+    steps:
+      # Step 1: Check out your rdma-core repository into the Ubuntu host runner
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Fire up the FreeBSD VM and execute the build steps
+      - name: Build in FreeBSD VM
+        uses: vmactions/freebsd-vm@v1
+        with:
+          release: "14.1" # Choose your desired FreeBSD release (e.g., 14.1, 15.0)
+          usesh: true     # Use standard sh rather than tcsh (default shell on FreeBSD)
+          
+          # The 'prepare' section runs inside the VM before copying files, 
+          # ideal for installing system package dependencies.
+          prepare: |
+            pkg update
+            pkg install -y cmake ninja pkgconf gcc
+
+          # The 'run' section runs within your repository's root directory inside the VM.
+          run: |
+            # Create a build directory
+            uname -a
+            #sysctl hw.model
+            sysctl hw.ncpu
+            sysctl hw.physmem
+            sysctl hw.usermem

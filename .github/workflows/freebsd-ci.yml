@@ -23,17 +23,14 @@ jobs:
         with:
           release: "14.1" # Choose your desired FreeBSD release (e.g., 14.1, 15.0)
           usesh: true     # Use standard sh rather than tcsh (default shell on FreeBSD)
-          
+
           # The 'prepare' section runs inside the VM before copying files, 
           # ideal for installing system package dependencies.
           prepare: |
-            pkg update
-            pkg install -y cmake ninja pkgconf gcc
+          uname -a
 
           # The 'run' section runs within your repository's root directory inside the VM.
           run: |
-            # Create a build directory
-            uname -a
             #sysctl hw.model
             sysctl hw.ncpu
             sysctl hw.physmem

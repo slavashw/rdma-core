@@ -6,32 +6,37 @@ on:
   pull_request:
     branches: [ "master", "main" ]
 
+env:
+  FREEBSD_IMAGE_URL: https://github.com/slavashw/freebsd-builder/releases/download/v15.1.0/freebsd-15.1-x86-64.qcow2
+
 jobs:
   build-freebsd:
-    # vmactions runs a QEMU VM inside an Ubuntu runner, so runs-on MUST be ubuntu-latest
     runs-on: ubuntu-latest
     name: Build rdma-core on FreeBSD
+    defaults:
+      run:
+        shell: cpa.sh {0}
 
     steps:
-      # Step 1: Check out your rdma-core repository into the Ubuntu host runner
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Step 2: Fire up the FreeBSD VM and execute the build steps
-      - name: Build in FreeBSD VM
-        uses: vmactions/freebsd-vm@v1
+      - name: Verify BYO image URL is reachable
+        shell: bash
+        run: |
+          curl -fIL --retry 3 --range 0-0 "${FREEBSD_IMAGE_URL}"
+
+      - name: Start FreeBSD VM
+        uses: cross-platform-actions/action@v1.3.0
         with:
-          release: "14.1" # Choose your desired FreeBSD release (e.g., 14.1, 15.0)
-          usesh: true     # Use standard sh rather than tcsh (default shell on FreeBSD)
+          operating_system: freebsd
+          version: '15.1'
+          architecture: x86-64
+          image_url: ${{ env.FREEBSD_IMAGE_URL }}
 
-          # The 'prepare' section runs inside the VM before copying files, 
-          # ideal for installing system package dependencies.
-          prepare: |
-            uname -a
-
-          # The 'run' section runs within your repository's root directory inside the VM.
-          run: |
-            #sysctl hw.model
-            sysctl hw.ncpu
-            sysctl hw.physmem
-            sysctl hw.usermem
+      - name: Smoke test in FreeBSD VM
+        run: |
+          uname -a
+          sysctl hw.ncpu
+          sysctl hw.physmem
+          sysctl hw.usermem

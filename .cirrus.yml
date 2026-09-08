@@ -1,0 +1,11 @@
+freebsd_instance:
+  image_family: freebsd-14-0
+
+task:
+  name: FreeBSD 14 Compilation
+  install_script:
+    - pkg update
+    - pkg install -y cmake ninja gcc pkgconf
+  build_script:
+    - cmake -B build -GNinja
+    - ninja -C build
